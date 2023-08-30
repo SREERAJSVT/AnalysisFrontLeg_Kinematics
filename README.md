@@ -95,3 +95,119 @@ Analyzing the front leg kinematics of a cricket bowler using a Raspberry Pi 4 an
 3. Compare the kinematic data with known patterns of efficient bowling techniques and identify areas for improvement.
 
 Remember that this is a basic example and advanced analysis might involve calibrating the sensor, applying sensor fusion algorithms for accurate orientation, and using machine learning for phase classification. Collaborating with experts in biomechanics, sensor fusion, and data analysis can help refine your approach.
+*Using MPU6050*
+Analyzing the kinematics of a cricket player's motion using an MPU6050 sensor and a Raspberry Pi involves capturing motion data and interpreting it to understand the player's movements. Here's a step-by-step guide:
+
+**Hardware Setup:**
+
+1. **Raspberry Pi Setup:**
+   - Set up your Raspberry Pi with a compatible operating system (Raspberry Pi OS).
+   - Connect to the internet and ensure you have the necessary software libraries installed.
+
+2. **MPU6050 Connection:**
+   - Connect the MPU6050 sensor to the Raspberry Pi using I2C communication (SDA and SCL pins).
+   - Supply power (VCC) and ground (GND) to the sensor.
+
+**Python Code Implementation:**
+
+1. **Install Libraries:**
+   Install the necessary libraries for I2C communication and data analysis.
+
+   ```bash
+   pip install smbus2 numpy matplotlib
+   ```
+
+2. **Data Collection Script (`mpu6050_data_collection.py`):**
+   Write a Python script to collect motion data from the MPU6050 sensor.
+
+   ```python
+   import time
+   import smbus2
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   bus = smbus2.SMBus(1)  # Use 1 for Raspberry Pi 2 or 3, use 0 for older models
+
+   MPU6050_ADDR = 0x68
+
+   def read_raw_data(addr):
+       high = bus.read_byte_data(MPU6050_ADDR, addr)
+       low = bus.read_byte_data(MPU6050_ADDR, addr + 1)
+       value = ((high << 8) | low)
+       if value > 32768:
+           value = value - 65536
+       return value
+
+   data = {'timestamp': [], 'acceleration': [], 'gyroscope': []}
+
+   try:
+       while True:
+           timestamp = time.time()
+           accel_x = read_raw_data(0x3B)
+           accel_y = read_raw_data(0x3D)
+           accel_z = read_raw_data(0x3F)
+
+           gyro_x = read_raw_data(0x43)
+           gyro_y = read_raw_data(0x45)
+           gyro_z = read_raw_data(0x47)
+
+           data['timestamp'].append(timestamp)
+           data['acceleration'].append((accel_x, accel_y, accel_z))
+           data['gyroscope'].append((gyro_x, gyro_y, gyro_z))
+
+           time.sleep(0.01)  # Adjust the sleep time as needed
+   except KeyboardInterrupt:
+       print("Data collection stopped")
+
+   np.save('mpu6050_data.npy', data)
+   ```
+
+3. **Data Analysis Script (`mpu6050_data_analysis.py`):**
+   Write a Python script to analyze and visualize the collected data.
+
+   ```python
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   data = np.load('mpu6050_data.npy', allow_pickle=True).item()
+
+   timestamps = data['timestamp']
+   accelerations = np.array(data['acceleration'])
+   gyroscopes = np.array(data['gyroscope'])
+
+   plt.figure(figsize=(12, 6))
+   plt.subplot(2, 1, 1)
+   plt.plot(timestamps, accelerations)
+   plt.xlabel('Time (s)')
+   plt.ylabel('Acceleration (raw)')
+   plt.title('Acceleration Data')
+
+   plt.subplot(2, 1, 2)
+   plt.plot(timestamps, gyroscopes)
+   plt.xlabel('Time (s)')
+   plt.ylabel('Gyroscope (raw)')
+   plt.title('Gyroscope Data')
+
+   plt.tight_layout()
+   plt.show()
+   ```
+
+**Data Collection and Analysis:**
+
+1. Run the `mpu6050_data_collection.py` script on your Raspberry Pi to collect motion data. Stop the script when you've collected sufficient data by pressing `Ctrl + C`.
+
+2. Transfer the `mpu6050_data.npy` file to your development machine for analysis.
+
+3. Run the `mpu6050_data_analysis.py` script on your development machine to visualize the acceleration and gyroscope data over time.
+
+**Interpretation and Further Analysis:**
+
+1. Analyze the raw acceleration and gyroscope data to understand the cricket player's motion patterns.
+
+2. Apply signal processing techniques to filter and smooth the data for better analysis results.
+
+3. Extract meaningful features from the raw data to calculate angles, angular velocities, and accelerations.
+
+4. Compare the motion data to known patterns of efficient cricket movements to provide insights into the player's performance.
+
+Remember that raw data from sensors like the MPU6050 might need additional calibration and processing to accurately represent real-world motions. This example provides a basic starting point, but more sophisticated analysis and interpretation techniques might be required for comprehensive biomechanical analysis.
