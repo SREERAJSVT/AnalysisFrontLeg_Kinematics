@@ -94,4 +94,4 @@ Analyzing the front leg kinematics of a cricket bowler using a Raspberry Pi 4 an
 
 3. Compare the kinematic data with known patterns of efficient bowling techniques and identify areas for improvement.
 
-Remember that this is a basic example, and advanced analysis might involve calibrating the sensor, applying sensor fusion algorithms for accurate orientation, and using machine learning for phase classification. Collaborating with experts in biomechanics, sensor fusion, and data analysis can help refine your approach.
+Remember that this is a basic example and advanced analysis might involve calibrating the sensor, applying sensor fusion algorithms for accurate orientation, and using machine learning for phase classification. Collaborating with experts in biomechanics, sensor fusion, and data analysis can help refine your approach.
