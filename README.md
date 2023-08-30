@@ -274,4 +274,77 @@ In this example, the sketch reads raw accelerometer and gyroscope data from the 
 
 Visualize and interpret the calculated kinematic parameters using the Arduino Serial Monitor or other visualization tools. You can also use serial communication to transmit data to a computer for more advanced analysis.
 
+
+
+
+Identifying human joint angles using soft strain sensors and the MPU6050 sensor on an Arduino involves capturing data from the sensors, processing the strain data, and calculating joint angles. Here's a simplified example of how you might approach this:
+
+**1. Hardware Setup:**
+
+- Connect the MPU6050 sensor and soft strain sensors to the Arduino using appropriate pins and wiring.
+- Ensure proper power supply for both sensors.
+
+**2. Arduino Code Implementation:**
+
+Install the "MPU6050" library using the Arduino Library Manager and write the code to read data from the sensors and calculate joint angles.
+
+```cpp
+#include <Wire.h>
+#include <MPU6050.h>
+
+MPU6050 mpu;
+
+const int strainSensorPin = A0;  // Analog pin for the strain sensor
+const int referenceResistance = 10000;  // Resistance at no force applied
+const float voltageSupply = 5.0;  // Supply voltage to the strain sensor
+
+void setup() {
+  Wire.begin();
+  Serial.begin(9600);
+
+  mpu.initialize();
+  mpu.setDMPEnabled(true);
+}
+
+void loop() {
+  // Read MPU6050 data
+  int16_t accelX = mpu.getAccelerationX();
+  int16_t accelY = mpu.getAccelerationY();
+  int16_t accelZ = mpu.getAccelerationZ();
+
+  // Read strain sensor data
+  int strainSensorValue = analogRead(strainSensorPin);
+
+  // Convert strain sensor data to force
+  float resistance = (1023.0 / strainSensorValue - 1) * referenceResistance;
+  float force = voltageSupply / resistance;
+
+  // Calculate joint angles using sensor data
+  float jointAngleX = atan2(accelY, accelZ) * (180.0 / M_PI);
+  float jointAngleY = atan2(-accelX, accelZ) * (180.0 / M_PI);
+
+  // Print the calculated joint angles and force
+  Serial.print("Joint Angle X: ");
+  Serial.print(jointAngleX);
+  Serial.print(" degrees\t");
+
+  Serial.print("Joint Angle Y: ");
+  Serial.print(jointAngleY);
+  Serial.print(" degrees\t");
+
+  Serial.print("Force: ");
+  Serial.print(force);
+  Serial.println(" N");
+
+  delay(100);
+}
+```
+
+In this example, the code reads data from the MPU6050 sensor (acceleration values) and a soft strain sensor (analog input). It converts the strain sensor's analog reading into a force value. Then, it calculates joint angles (pitch and roll) based on the acceleration values. Note that this is a simplified example, and depending on the arrangement of the strain sensors and the intended joint angles, you might need to adjust the calculations accordingly.
+
+**3. Visualization and Interpretation:**
+
+Interpret the calculated joint angles and force values to analyze human joint movements. Visualize the data using the Arduino Serial Monitor or transfer it to a computer for further analysis and visualization.
+
+Please note that this example assumes a simplified setup and calculation. Real-world implementations might require sensor calibration, noise reduction, more advanced sensor fusion techniques, and a more accurate model for joint angle calculations.
 Remember that kinematics calculations might require careful handling of noise, calibration, and numerical errors. Advanced techniques such as sensor fusion algorithms could be applied to improve accuracy.
